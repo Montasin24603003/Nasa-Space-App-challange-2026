@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Sol by Sol · Mars Survival Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <style>
+        :root {
+            --bg: #f3ece4;
+            --panel: #fffaf4;
+            --ink: #2a1d17;
+            --mute: #7a685c;
+            --line: #dccfc3;
+            --acc: #b4451f;
+            --ok: #2f7a4f;
+            --bad: #b3261e;
+            --warn: #c98a0b;
+            --c1: #3b7dd8;
+            --c2: #1f9d8f;
+            --c3: #c98a0b;
+            --c4: #b3261e;
+            box-sizing: border-box;
+            padding-top: env(safe-area-inset-top, 0px);
+            padding-bottom: env(safe-area-inset-bottom, 0px)
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root:not([data-theme="light"]) {
+                --bg: #160f0c;
+                --panel: #221813;
+                --ink: #f1e4d8;
+                --mute: #a99383;
+                --line: #3a2a22;
+                --acc: #ff8a5c;
+                --ok: #5fc48a;
+                --bad: #ff6b5e;
+                --warn: #e8b04a;
+                --c1: #6ea8ff;
+                --c2: #4fd1c2;
+                --c3: #e8b04a;
+                --c4: #ff6b5e
+            }
+        }
+
+        :root[data-theme="dark"] {
+            --bg: #160f0c;
+            --panel: #221813;
+            --ink: #f1e4d8;
+            --mute: #a99383;
+            --line: #3a2a22;
+            --acc: #ff8a5c;
+            --ok: #5fc48a;
+            --bad: #ff6b5e;
+            --warn: #e8b04a;
+            --c1: #6ea8ff;
+            --c2: #4fd1c2;
+            --c3: #e8b04a;
+            --c4: #ff6b5e
+        }
+
+        html {
+            scroll-padding-top: env(safe-area-inset-top, 0px)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font: 16px/1.5 "Space Grotesk", "Segoe UI", system-ui, sans-serif
+        }
+
+        main {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 20px 16px 48px
+        }
+
+        h1 {
+            font: 700 clamp(28px, 6vw, 46px)/1.05 "Fraunces", Georgia, serif;
+            margin: 8px 0 6px;
+            letter-spacing: -.02em
+        }
+
+        h2 {
+            font: 600 18px "Fraunces", Georgia, serif;
+            margin: 0 0 10px
+        }
+
+        p.sub {
+            color: var(--mute);
+            margin: 0 0 20px;
+            max-width: 60ch
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 14px
+        }
+
+        .grid {
+            display: grid;
+            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--mute);
+            margin-bottom: 4px
+        }
+
+        select,
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--ink);
+            font: inherit
+        }
+
+        .desc {
+            font-size: 13px;
+            color: var(--mute);
+            margin-top: 4px;
+            min-height: 40px
+        }
+
+        button {
+            font: 600 15px inherit;
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            color: var(--ink);
+            cursor: pointer
+        }
+
+
+        button.p {
+            background: var(--acc);
+            color: #fff;
+            border-color: var(--acc)
+        }
+
+        #pp,
+        [data-sp],
+        #skip,
+        #chg,
+        #cmp {
+            background: var(--acc);
+            color: #fff;
+            border-color: var(--acc);
+        }
+
+        button:active {
+            transform: translateY(2px);
+            filter: brightness(0.8);
+        }
+
+        button:focus-visible,
+        select:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--acc);
+            outline-offset: 2px
+        }
+
+        .row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .g {
+            margin-bottom: 10px
+        }
+
+        .g .t {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px
+        }
+
+        .bar {
+            height: 10px;
+            background: var(--line);
+            border-radius: 5px;
+            overflow: hidden
+        }
+
+        .bar i {
+            display: block;
+            height: 100%;
+            width: 0;
+            background: var(--ok);
+            transition: width .1s
+        }
+
+        .logc {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0;
+            align-self: start;
+            height: 470px;
+        }
+
+        .logw {
+            flex: 1;
+            position: relative;
+            min-height: 260px
+        }
+
+        #feed {
+            position: absolute;
+            inset: 0;
+            overflow: auto;
+            font-size: 14px
+        }
+
+        @media(max-width:759px) {
+            .logw {
+                min-height: 0
+            }
+
+            #feed {
+                position: static;
+                max-height: 300px
+            }
+        }
+
+        #feed div {
+            padding: 6px 0;
+            border-bottom: 1px solid var(--line)
+        }
+
+        #feed b {
+            color: var(--acc)
+        }
+
+        #feed .fatal {
+            color: var(--bad)
+        }
+
+        #feed .sep {
+            color: var(--warn)
+        }
+
+        svg {
+            width: 100%;
+            height: auto;
+            display: block
+        }
+
+        .leg {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            font-size: 12px;
+            color: var(--mute)
+        }
+
+        .leg span:before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 5px;
+            background: var(--x)
+        }
+
+        .verdict {
+            font: 700 clamp(26px, 6vw, 40px) "Fraunces", Georgia, serif
+        }
+
+        .ok {
+            color: var(--ok)
+        }
+
+        .bad {
+            color: var(--bad)
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 12px 0
+        }
+
+        .stats div {
+            border-left: 3px solid var(--line);
+            padding-left: 10px;
+            font-size: 13px;
+            color: var(--mute)
+        }
+
+        .stats b {
+            display: block;
+            font-size: 19px;
+            color: var(--ink)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px
+        }
+
+        td,
+        th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .two {
+            display: grid;
+            gap: 14px;
+            grid-template-columns: 1fr
+        }
+
+        @media(min-width:760px) {
+            .two {
+                grid-template-columns: 1.5fr 1fr
+            }
+        }
+
+        details.live {
+            margin-top: 14px;
+            font-size: 14px
+        }
+
+        summary {
+            cursor: pointer;
+            color: var(--acc);
+            font-weight: 600
+        }
+
+        footer {
+            font-size: 12px;
+            color: var(--mute)
+        }
+
+        .hide {
+            display: none
+        }
+
+        @media(prefers-reduced-motion:reduce) {
+            .bar i {
+                transition: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Sol by sol</h1>
+        <p class="sub">Pick a site, a crew and a habitat. Then watch 500 sols on Mars, with real NASA solar particle
+            events and dust storms testing your choice.</p>
+
+        <section id="setup" class="card">
+            <div class="grid">
+                <div><label for="site">Landing site</label><select id="site"></select>
+                    <div class="desc" id="sd"></div>
+                </div>
+                <div><label for="crew">Crew size</label><select id="crew"></select>
+                    <div class="desc">Life support is sized for 5. Larger crews drain reserves.</div>
+                </div>
+                <div><label for="hab">Habitat</label><select id="hab"></select>
+                    <div class="desc" id="hd"></div>
+                </div>
+                <div><label for="seed">Seed</label>
+                    <div class="row"><input id="seed" type="number" value="1" min="1"><button id="rnd"
+                            type="button">Random</button></div>
+                    <div class="desc">Same seed, same storms and flares.</div>
+                </div>
+            </div>
+            <details class="live">
+                <summary>Live NASA data (optional)</summary>
+                <div class="grid" style="margin-top:10px">
+                    <div><label for="key">NASA API key (free at api.nasa.gov)</label><input id="key" type="password"
+                            placeholder="DEMO_KEY" autocomplete="off"></div>
+                    <div><label for="yr">Year of solar events</label><select id="yr">
+                            <option>2025</option>
+                            <option selected>2024</option>
+                            <option>2023</option>
+                        </select></div>
+                </div>
+                <div class="row" style="margin-top:8px"><button type="button" id="live">Refresh from NASA DONKI</button>
+                </div>
+                <p class="desc" id="lst" aria-live="polite">Using bundled NASA DONKI 2024 snapshot.</p>
+            </details>
+            <div class="row" style="margin-top:12px"><button class="p" id="go">Launch mission</button></div>
+        </section>
+
+        <section id="run" class="hide">
+            <div class="two">
+                <div>
+                    <div class="card">
+                        <div class="row" style="justify-content:space-between">
+                            <h2 id="solc">Sol 1 / 500</h2>
+                            <div class="row"><button id="pp">Pause</button><button data-sp="1">x1</button><button
+                                    data-sp="5">x5</button><button data-sp="20">x20</button><button id="skip">Skip to
+                                    result</button></div>
+                        </div>
+                        <div id="gauges"></div>
+                    </div>
+                    <div class="card"><svg id="ch" viewBox="0 0 600 200" role="img"
+                            aria-label="Resources over time"></svg>
+                        <div class="leg"><span style="--x:var(--c1)">Oxygen</span><span
+                                style="--x:var(--c2)">Water</span><span style="--x:var(--c3)">Power</span><span
+                                style="--x:var(--c4)">Radiation dose</span></div>
+                    </div>
+                </div>
+                <div class="card logc">
+                    <h2>Mission log</h2>
+                    <div class="logw">
+                        <div id="feed"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rep" class="hide"></section>
+        <footer class="card"><b>Data sources.</b> Radiation baseline: NASA Curiosity RAD (Gale Crater, 0.64 mSv/day).
+            Dose limit: NASA-STD-3001 career limit of 600 mSv. Oxygen (0.84 kg) and water (4.35 kg) per crew member per
+            day: NASA Life Support Baseline Values and Assumptions Document (BVAD). Solar particle events: NASA DONKI
+            catalogue of 2024 episodes, replayed with a 50% chance each to reflect that Mars does not always face the
+            same part of the Sun as Earth. Dust storm shape: published Curiosity and JPL optical depth records. Site
+            values, dose spike multipliers, power budgets, plant sizing and starting reserves are model assumptions, not
+            mission requirements.</footer>
+    </main>
+    <script>
+        // ---- DATA (site/habitat values are approximate model inputs) ----
+        const SITES = {jezero: {n: 'Jezero Crater', rad: .95, ice: .55, sol: .9}, gale: {n: 'Gale Crater', rad: 1, ice: .4, sol: .95}, utopia: {n: 'Utopia Planitia', rad: 1, ice: .9, sol: .7}, arcadia: {n: 'Arcadia Planitia', rad: 1.1, ice: .85, sol: .7}, hellas: {n: 'Hellas Basin', rad: .85, ice: .5, sol: .9}};
+        const HABS = {surface: {n: 'Surface Module', sh: .10, pw: 90}, regolith: {n: 'Regolith-Covered Habitat', sh: .40, pw: 110}, lava: {n: 'Lava Tube Shelter', sh: .70, pw: 150}};
+        // K sources: dose = NASA Curiosity RAD baseline (mSv/sol); o2 = NASA BVAD 0.84 kg/crew/day; h2o = NASA BVAD 4.35 kg/crew/day; limit = NASA-STD-3001 career limit 600 mSv.
+        // Everything else (power, plant sizing, start reserves, spike multipliers) is a MODEL ASSUMPTION.
+        const K = {dose: .64, o2: .84, h2o: 4.35, crewPw: 12, panel: 320, plant: 5, bat: 3, limit: 600, start: 90, startCrew: 4, tau0: .6};
+        // NASA DONKI 2024 solar particle episodes as [day-of-year, tier]
+        let SEPSRC = 'NASA DONKI 2024 (bundled snapshot)';
+        let SEP = [[2, 2], [22, 1], [29, 2], [37, 1], [40, 2], [43, 3], [75, 2], [83, 2], [130, 3], [134, 2], [160, 3], [164, 2], [205, 3], [213, 1], [218, 1], [245, 1], [249, 1], [253, 2], [261, 2], [283, 3], [300, 2], [326, 3], [343, 1], [353, 1], [356, 1]];
+        const MULT = {1: 1, 2: 4, 3: 12}, TIER = {1: 'minor', 2: 'moderate', 3: 'severe'};
+        function rng(a) {return () => {a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296}}
+        function simulate({site, crew, hab, seed}) {
+            const S = SITES[site], H = HABS[hab], R = rng(seed), N = 500, ev = [], log = [], storms = [], sp = {};
+            const nr = 2 + Math.floor(R() * 2);
+            for (let i = 0; i < nr; i++)storms.push({s: 5 + Math.floor(R() * 470), pk: 2 + R() * 2, g: 0});
+            if (R() < .25) storms.push({s: 80 + Math.floor(R() * 270), pk: 5 + R() * 3.5, g: 1});
+            for (const w of storms) ev.push({sol: w.s, msg: w.g ? `A planet-encircling dust storm begins, peaking near optical depth ${w.pk.toFixed(1)}.` : `A regional dust storm rolls in, peaking near optical depth ${w.pk.toFixed(1)}.`, k: 'dust'});
+            const tau = t => {let m = K.tau0; for (const w of storms) {const d = t - w.s; if (d < 0) continue; const f = d < 12 ? d / 12 : d < 33 ? 1 : Math.exp(-(d - 33) / 43); m = Math.max(m, K.tau0 + (w.pk - K.tau0) * f)} return m};
+            const off = Math.floor(R() * 366);
+            for (const [d, t] of SEP) {if (R() < .5) {const b = (d - off + 366) % 366 + 1; for (const s of [b, b + 366]) if (s <= N) {sp[s] = Math.max(sp[s] || 0, MULT[t]); sp[s + 1] = Math.max(sp[s + 1] || 0, MULT[t]); ev.push({sol: s, msg: `A ${TIER[t]} solar particle event sweeps the site; crew dose rate climbs for 2 sols.`, k: 'sep'})} } }
+            const dem = H.pw + K.crewPw * crew, cap = dem * K.bat, o2s = K.start * K.o2 * K.startCrew, ws = K.start * K.h2o * K.startCrew;
+            let o2 = o2s, w = ws, bat = cap, dose = 0, dry = 0, red = 0, none = 0, maxTau = K.tau0, pfs = [], dead = null, half = 0, warn = 0, s = 0;
+            for (s = 1; s <= N; s++) {
+                const t = tau(s); maxTau = Math.max(maxTau, t);
+                const gen = K.panel * S.sol * Math.exp(-(t - K.tau0)), net = gen - dem; let pf;
+                if (net >= 0) {bat = Math.min(cap, bat + net); pf = 1} else {const u = Math.min(bat, -net); bat -= u; pf = (gen + u) / dem}
+                pfs.push(pf); if (pf < .6) red++; if (pf < .05) none++;
+                const th = .25 + .75 * pf; // MODEL ASSUMPTION: life-support loads get priority power
+                w = Math.min(ws * 1.5, w + K.plant * K.h2o * (.85 + .3 * S.ice) * th - crew * K.h2o);
+                o2 = Math.min(o2s * 1.5, o2 + K.plant * K.o2 * th - crew * K.o2);
+                dose += K.dose * S.rad * (1 - H.sh) * (1 + (sp[s] || 0));
+                if (w <= 0) {w = 0; dry++} else dry = 0;
+                if (o2 < 0) o2 = 0;
+                log.push({s, o2, w, pf, dose, tau: t});
+                if (!half && dose >= K.limit / 2) {half = 1; ev.push({sol: s, msg: 'Each crew member has now absorbed half of NASA’s 600 mSv career dose limit.', k: 'warn'})}
+                if (!warn && w < 10 * crew * K.h2o) {warn = 1; ev.push({sol: s, msg: 'Water reserves fall below ten sols of supply.', k: 'warn'})}
+                const rec = pfs.slice(-15), avg = rec.reduce((a, b) => a + b, 0) / rec.length, storm = avg < .6;
+                const pct = Math.round(avg * 100), tx = t.toFixed(1);
+                if (o2 <= 0) dead = storm ? `A dust storm (optical depth ${tx}) cut solar power to ${pct}% of demand, oxygen generation stalled, and the crew ran out of breathable air on sol ${s}.` : `Oxygen generation could not keep up with ${crew} crew members; reserves ran out and the crew suffocated on sol ${s}.`;
+                else if (dry >= 3) dead = storm ? `A dust storm (optical depth ${tx}) cut solar power to ${pct}% of demand, water extraction stalled, and the crew died of dehydration on sol ${s}.` : `Water production could not keep up with ${crew} crew members; reserves ran out and the crew died of dehydration on sol ${s}.`;
+                else if (dose >= K.limit) dead = `Accumulated radiation passed NASA’s 600 mSv career limit on sol ${s}, so the mission was aborted.`;
+                if (dead) {ev.push({sol: s, msg: dead, k: 'fatal'}); break}
+            }
+            const ok = !dead, run = Math.min(s, N);
+            let score;
+            if (ok) {const fr = Math.min(1, (o2 / o2s + w / ws) / 2); score = Math.round(Math.min(95, 100 - dose / K.limit * 30 - (1 - fr) * 20 - Math.min(20, red * .1)))}
+            else score = Math.round(run / N * 40);
+            ev.sort((a, b) => a.sol - b.sol);
+            return {ok, score, cause: dead, run, log, ev, dose, maxTau, red, none, o2, w, sepCount: ev.filter(e => e.k === 'sep').length, site: S.n, hab: H.n, crew, seed, sh: H.sh};
+        }
+        // Group DONKI SEP records (many instruments per event) into episodes: records within 48h = one episode.
+        // Tier is an ESTIMATE: any '>100 MeV' detection = severe(3), 4+ detections = moderate(2), else minor(1). Returns [dayOfYear, tier].
+        function toEpisodes(raw) {
+            const rs = raw.map(r => ({t: Date.parse(r.eventTime), hard: (r.instruments || []).some(i => String(i.displayName).includes('>100 MeV'))})).filter(r => !isNaN(r.t)).sort((a, b) => a.t - b.t);
+            const cs = []; for (const r of rs) {const l = cs[cs.length - 1]; if (l && r.t - l[l.length - 1].t <= 48 * 36e5) l.push(r); else cs.push([r])}
+            return cs.map(c => {const d = new Date(c[0].t), y = d.getUTCFullYear(); return [Math.round((Date.UTC(y, d.getUTCMonth(), d.getUTCDate()) - Date.UTC(y, 0, 0)) / 864e5), c.some(r => r.hard) ? 3 : c.length >= 4 ? 2 : 1]})
+        }
+
+        const $ = id => document.getElementById(id);
+        const SD = {jezero: 'Ancient river delta. Good sunlight, moderate ice.', gale: 'Curiosity’s home. Our measured radiation baseline. Little ice.', utopia: 'Rich subsurface ice, weaker sunlight.', arcadia: 'Ice-rich northern plain, weaker sunlight.', hellas: 'Deepest basin. Thicker air shields radiation.'};
+        const HD = {surface: 'Light shielding, low power use.', regolith: 'Buried in bricks. Better shielding, more power.', lava: 'Natural rock shelter. Heavy shielding, high power use.'};
+        $('site').innerHTML = Object.entries(SITES).map(([k, v]) => `<option value="${k}">${v.n}</option>`).join('');
+        $('hab').innerHTML = Object.entries(HABS).map(([k, v]) => `<option value="${k}">${v.n}</option>`).join('');
+        $('crew').innerHTML = [2, 3, 4, 5, 6, 7, 8].map(n => `<option ${n == 4 ? 'selected' : ''}>${n}</option>`).join('');
+        const upd = () => {$('sd').textContent = SD[$('site').value]; $('hd').textContent = HD[$('hab').value]}; $('site').onchange = $('hab').onchange = upd; upd();
+        $('live').onclick = async () => {
+            const st = $('lst'), key = $('key').value.trim() || 'DEMO_KEY', y = $('yr').value; st.textContent = 'Contacting NASA DONKI…';
+            try {
+                const r = await fetch(`https://api.nasa.gov/DONKI/SEP?startDate=${y}-01-01&endDate=${y}-12-31&api_key=${encodeURIComponent(key)}`);
+                if (!r.ok) throw new Error(r.status == 429 ? 'rate limit reached, use your own API key' : 'HTTP ' + r.status);
+                const j = await r.json(); if (!Array.isArray(j) || !j.length) throw new Error('no events returned');
+                SEP = toEpisodes(j); SEPSRC = `NASA DONKI ${y} (live, ${SEP.length} episodes)`;
+                st.textContent = `Loaded ${j.length} records, grouped into ${SEP.length} solar particle episodes from NASA DONKI ${y}. New runs use them.`
+            }
+            catch (err) {st.textContent = `Could not load live data (${err.message}). Still using ${SEPSRC}.`}
+        };
+        $('rnd').onclick = () => $('seed').value = 1 + Math.floor(Math.random() * 9999);
+        let R, i, timer, speed = 5, paused = false, cfg;
+        const cols = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)'], names = ['Oxygen', 'Water', 'Power', 'Radiation dose'];
+        function show(id) {['setup', 'run', 'rep'].forEach(x => $(x).classList.toggle('hide', x !== id && !(id === 'rep' && x === 'run')))}
+        function chart(n) {
+            const L = R.log, mx = [Math.max(...L.map(d => d.o2)), Math.max(...L.map(d => d.w)), 1, K.limit];
+            const v = [d => d.o2 / mx[0], d => d.w / mx[1], d => d.pf, d => d.dose / K.limit];
+            $('ch').innerHTML = `<rect x="0" y="0" width="600" height="200" fill="none" stroke="var(--line)"/>` + v.map((f, k) => `<polyline fill="none" stroke="${cols[k]}" stroke-width="2" points="${L.slice(0, n).map((d, j) => `${(j / 499 * 596 + 2).toFixed(1)},${(196 - Math.min(1, f(d)) * 190).toFixed(1)}`).join(' ')}"/>`).join('')
+        }
+        function gauges(d) {
+            const g = [[d.o2 / (R.log[0].o2 * 1.5), Math.round(d.o2) + ' kg'], [d.w / (R.log[0].w * 1.5), Math.round(d.w) + ' L'], [d.pf, Math.round(d.pf * 100) + '% of demand'], [d.dose / K.limit, d.dose.toFixed(0) + ' mSv']];
+            $('gauges').innerHTML = g.map((x, k) => {const r = k == 3 ? x[0] : x[0], bad = k == 3 ? r > .75 : r < .15, warn = k == 3 ? r > .5 : r < .35; return `<div class="g"><div class="t"><span>${names[k]}</span><span>${x[1]}${k == 2 ? ` · tau ${d.tau.toFixed(1)}` : ''}</span></div><div class="bar"><i style="width:${Math.min(100, r * 100)}%;background:${bad ? 'var(--bad)' : warn ? 'var(--warn)' : 'var(--ok)'}"></i></div></div>`}).join('')
+        }
+        function tick() {
+            const n = Math.min(i + speed, R.run); for (const e of R.ev.filter(e => e.sol > i && e.sol <= n)) {const d = document.createElement('div'); d.className = e.k; d.innerHTML = `<b>Sol ${e.sol}</b> ${e.msg}`; $('feed').prepend(d)}
+            i = n; $('solc').textContent = `Sol ${i} / 500`; gauges(R.log[i - 1]); chart(i); if (i >= R.run) {clearInterval(timer); setTimeout(report, 700)}
+        }
+        function start(c) {cfg = c; R = simulate(c); i = 0; $('feed').innerHTML = ''; show('run'); $('pp').textContent = 'Pause'; paused = false; clearInterval(timer); timer = setInterval(() => {if (!paused) tick()}, 120)}
+        $('go').onclick = () => start({site: $('site').value, crew: +$('crew').value, hab: $('hab').value, seed: +$('seed').value || 1});
+        $('pp').onclick = () => {paused = !paused; $('pp').textContent = paused ? 'Resume' : 'Pause'};
+        document.querySelectorAll('[data-sp]').forEach(b => b.onclick = () => speed = +b.dataset.sp);
+        $('skip').onclick = () => {clearInterval(timer); for (const e of R.ev) {if (e.sol > i) {const d = document.createElement('div'); d.className = e.k; d.innerHTML = `<b>Sol ${e.sol}</b> ${e.msg}`; $('feed').prepend(d)} } i = R.run; $('solc').textContent = `Sol ${i} / 500`; gauges(R.log[i - 1]); chart(i); report()};
+        function report() {
+            const r = R, top = r.ev.filter(e => e.k == 'dust' || e.k == 'fatal' || (e.k == 'sep' && /severe/.test(e.msg))).slice(-3);
+            $('rep').className = ''; $('rep').innerHTML = `<div class="card"><div class="verdict ${r.ok ? 'ok' : 'bad'}">${r.ok ? 'Crew survived' : 'Mission failed · sol ' + r.run}</div><div style="font-size:22px;margin:4px 0">Score ${r.score} / 100</div>
+ <p>${r.ok ? `All ${r.crew} crew members completed 500 sols at ${r.site} in a ${r.hab}.` : r.cause}</p>
+ <div class="stats"><div><b>${r.dose.toFixed(0)} mSv</b>dose per crew member, NASA career limit ${K.limit}</div><div><b>${r.maxTau.toFixed(1)}</b>worst dust optical depth</div><div><b>${r.sepCount}</b>solar particle events</div><div><b>${r.red}</b>sols with under 60% power</div><div><b>${Math.round(r.o2)} kg · ${Math.round(r.w)} L</b>oxygen and water left</div></div><p class="desc">Solar events: ${SEPSRC}</p>
+ ${r.ok ? '' : `<h2>What went wrong</h2><ul>${top.map(e => `<li>Sol ${e.sol}: ${e.msg}</li>`).join('')}</ul>`}
+ <div class="row"><button class="p" id="again">Run again, same seed</button><button id="chg">Change setup</button><button id="cmp">Compare habitats, same seed</button></div><div id="cmpo"></div></div>`;
+            $('again').onclick = () => start(cfg); $('chg').onclick = () => {clearInterval(timer); $('rep').className = 'hide'; show('setup')};
+            $('cmp').onclick = () => {$('cmpo').innerHTML = '<table><tr><th>Habitat</th><th>Result</th><th>Score</th><th>Dose</th></tr>' + Object.keys(HABS).map(h => {const x = simulate({...cfg, hab: h}); return `<tr><td>${HABS[h].n}</td><td class="${x.ok ? 'ok' : 'bad'}">${x.ok ? 'Survived' : 'Lost on sol ' + x.run}</td><td>${x.score}</td><td>${x.dose.toFixed(0)} mSv</td></tr>`}).join('') + '</table><p class="sub">Same storms, same flares. Only the habitat changed.</p>'};
+            document.getElementById('rep').scrollIntoView({behavior: 'smooth'})
+        }
+    </script>
+</body>
+
+</html>

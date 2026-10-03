@@ -1,0 +1,15 @@
+MARTIAN MAP 2026 — COMPLETE LIGHT/DARK BUILD
+
+1. Open this folder in VS Code.
+2. Open PowerShell in this folder (the folder containing package.json).
+3. Run: npm install
+4. Optional: copy .env.example to .env and add your Gemini key.
+5. Run: npm run dev
+6. Open the Local URL shown by Vite/TanStack Start.
+
+Theme:
+- Light mode is the default.
+- Use the Light/Dark button in the top-right navigation.
+- Your choice is remembered in the browser.
+
+The original Sol-by-Sol HTML simulator is in public/sol-simulator/.

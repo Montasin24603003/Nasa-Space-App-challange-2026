@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Sol by Sol · Mars Survival Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <link rel="stylesheet" href="/sol-simulator/styles.css">
+</head>
+
+<body>
+    <main>
+        <h1>Sol by sol</h1>
+        <p class="sub">Pick a site, a crew and a habitat. Then watch 500 sols on Mars, with real NASA solar particle
+            events and dust storms testing your choice.</p>
+
+        <section id="setup" class="card">
+            <div class="grid">
+                <div><label for="site">Landing site</label><select id="site"></select>
+                    <div class="desc" id="sd"></div>
+                </div>
+                <div><label for="crew">Crew size</label><select id="crew"></select>
+                    <div class="desc">Life support is sized for 5. Larger crews drain reserves.</div>
+                </div>
+                <div><label for="hab">Habitat</label><select id="hab"></select>
+                    <div class="desc" id="hd"></div>
+                </div>
+                <div><label for="seed">Seed</label>
+                    <div class="row"><input id="seed" type="number" value="1" min="1"><button id="rnd"
+                            type="button">Random</button></div>
+                    <div class="desc">Same seed, same storms and flares.</div>
+                </div>
+            </div>
+            <details class="live">
+                <summary>Live NASA data (optional)</summary>
+                <div class="grid" style="margin-top:10px">
+                    <div><label for="key">NASA API key (free at api.nasa.gov)</label><input id="key" type="password"
+                            placeholder="DEMO_KEY" autocomplete="off"></div>
+                    <div><label for="yr">Year of solar events</label><select id="yr">
+                            <option>2025</option>
+                            <option selected>2024</option>
+                            <option>2023</option>
+                        </select></div>
+                </div>
+                <div class="row" style="margin-top:8px"><button type="button" id="live">Refresh from NASA DONKI</button>
+                </div>
+                <p class="desc" id="lst" aria-live="polite">Using bundled NASA DONKI 2024 snapshot.</p>
+            </details>
+            <div class="row" style="margin-top:12px"><button class="p" id="go">Launch mission</button></div>
+        </section>
+
+        <section id="run" class="hide">
+            <div class="two">
+                <div>
+                    <div class="card">
+                        <div class="row" style="justify-content:space-between">
+                            <h2 id="solc">Sol 1 / 500</h2>
+                            <div class="row"><button id="pp">Pause</button><button data-sp="1">x1</button><button
+                                    data-sp="5">x5</button><button data-sp="20">x20</button><button id="skip">Skip to
+                                    result</button></div>
+                        </div>
+                        <div id="gauges"></div>
+                    </div>
+                    <div class="card"><svg id="ch" viewBox="0 0 600 200" role="img"
+                            aria-label="Resources over time"></svg>
+                        <div class="leg"><span style="--x:var(--c1)">Oxygen</span><span
+                                style="--x:var(--c2)">Water</span><span style="--x:var(--c3)">Power</span><span
+                                style="--x:var(--c4)">Radiation dose</span></div>
+                    </div>
+                </div>
+                <div class="card logc">
+                    <h2>Mission log</h2>
+                    <div class="logw">
+                        <div id="feed"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="rep" class="hide"></section>
+
+        <section id="ai-advisor" class="card" aria-labelledby="ai-title">
+            <div class="row" style="justify-content:space-between">
+                <div>
+                    <p style="margin:0;color:var(--acc);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Mission intelligence</p>
+                    <h2 id="ai-title" style="margin-top:4px">AI Mission Advisor</h2>
+                </div>
+                <span id="ai-status" class="desc" style="min-height:0;margin:0">Local rules + optional OpenAI Responses API</span>
+            </div>
+            <p class="desc" style="margin-top:8px">Ask the advisor to explain a simulation result, compare habitats, or identify the next mitigation step. The browser never receives your model API key.</p>
+            <div class="grid" style="margin-top:10px">
+                <div style="grid-column:1/-1">
+                    <label for="ai-question">Mission question</label>
+                    <textarea id="ai-question" rows="3" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);font:inherit;resize:vertical" placeholder="Example: Which habitat should I choose for this mission and why?"></textarea>
+                </div>
+            </div>
+            <div class="row" style="margin-top:8px">
+                <button class="p" type="button" id="ai-ask">Ask mission advisor</button>
+                <button type="button" id="ai-clear">Clear</button>
+            </div>
+            <div id="ai-answer" class="desc" style="margin-top:12px;white-space:pre-wrap;min-height:54px" aria-live="polite">Advisor ready. Run a mission first for result-aware guidance.</div>
+        </section>
+
+        <footer class="card"><b>Data sources.</b> Radiation baseline: NASA Curiosity RAD (Gale Crater, 0.64 mSv/day).
+            Dose limit: NASA-STD-3001 career limit of 600 mSv. Oxygen (0.84 kg) and water (4.35 kg) per crew member per
+            day: NASA Life Support Baseline Values and Assumptions Document (BVAD). Solar particle events: NASA DONKI
+            catalogue of 2024 episodes, replayed with a 50% chance each to reflect that Mars does not always face the
+            same part of the Sun as Earth. Dust storm shape: published Curiosity and JPL optical depth records. Site
+            values, dose spike multipliers, power budgets, plant sizing and starting reserves are model assumptions, not
+            mission requirements.</footer>
+    </main>
+    <script src="/sol-simulator/app.js" defer></script>
+</body>
+
+</html>

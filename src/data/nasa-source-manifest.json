@@ -1,0 +1,36 @@
+{
+  "project": "Interplanetary Survival Guide: Martian Map",
+  "source": "NASA Open Data Portal pages supplied in nasa(1).zip",
+  "records": [
+    {
+      "title": "VO1/VO2 MARS INFRARED THERMAL MAPPER RESAMPLED DATA V1.0",
+      "category": "Thermal",
+      "url": "https://data.nasa.gov/dataset/vo1-vo2-mars-infrared-thermal-mapper-resampled-data-v1-0"
+    },
+    {
+      "title": "ODYSSEY MARS MARIE REFORMATTED RAW DATA V1.0",
+      "category": "Radiation",
+      "url": "https://data.nasa.gov/dataset/odyssey-mars-marie-reformatted-raw-data-v1-0-360da"
+    },
+    {
+      "title": "ODYSSEY MARS MARIE CALIBRATED DATA V1.0",
+      "category": "Radiation",
+      "url": "https://data.nasa.gov/dataset/odyssey-mars-marie-calibrated-data-v1-0-ba23a"
+    },
+    {
+      "title": "MRO CRISM MAP-PROJECTED TARGETED REDUCED DATA RECORD V1.0",
+      "category": "Mineralogy / Spectroscopy",
+      "url": "https://data.nasa.gov/dataset/mro-crism-map-projected-targeted-reduced-data-record-v1-0-ae389"
+    },
+    {
+      "title": "Classification of Mars Terrain Using Multiple Data Sources",
+      "category": "Terrain / ML",
+      "url": "https://data.nasa.gov/dataset/classification-of-mars-terrain-using-multiple-data-sources"
+    },
+    {
+      "title": "MRO CRISM TARGETED EMPIRICAL RECORD V1.0",
+      "category": "Mineralogy / Spectroscopy",
+      "url": "https://data.nasa.gov/dataset/mro-crism-targeted-empirical-record-v1-0-1d641"
+    }
+  ]
+}
