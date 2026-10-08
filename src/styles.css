@@ -301,3 +301,297 @@ html.dark .text-fog {
 html.dark .border-line {
   border-color: #334155 !important;
 }
+
+/* Immersive Mission Lab: use the full browser width without changing the home page. */
+.mission-lab-main {
+  width: 100%;
+  padding: 0;
+}
+
+.mission-lab-main > .mission-lab-page {
+  width: 100%;
+}
+
+.mission-lab-explorer {
+  width: 100%;
+  max-width: none;
+}
+
+.mission-lab-explorer > .mb-5.grid {
+  margin: 0;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 94%, transparent);
+}
+
+.mission-lab-explorer > .mb-5.grid h1 {
+  font-size: clamp(1.35rem, 2.1vw, 2.15rem);
+  line-height: 1;
+  max-width: none;
+}
+
+.mission-lab-explorer > .mb-5.grid p.mt-3 {
+  display: none;
+}
+
+.mission-lab-explorer > .mb-4.grid {
+  margin: 0;
+  padding: 8px 18px;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  background: var(--ink2);
+}
+
+.mission-lab-explorer > .mb-4.grid > div {
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.mission-lab-explorer > .mb-4.grid > div svg {
+  width: 13px;
+  height: 13px;
+}
+
+.mission-lab-explorer > .mb-4.grid > div p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mission-lab-explorer > .grid.overflow-hidden {
+  width: 100%;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  box-shadow: none;
+}
+
+.mission-lab-explorer > .grid.overflow-hidden > .relative {
+  height: calc(100vh - 235px) !important;
+  min-height: 650px !important;
+}
+
+.mission-lab-explorer > .grid.overflow-hidden > aside {
+  min-height: calc(100vh - 235px) !important;
+  max-height: calc(100vh - 235px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 16px;
+}
+
+/* Keep the regional dataset chooser compact so it never covers the 3D model. */
+.mission-lab-explorer .absolute.bottom-4.left-4.right-4.z-10 {
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  padding: 9px;
+}
+
+.mission-lab-explorer .absolute.bottom-4.left-4.right-4.z-10 .grid {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.mission-lab-explorer .absolute.bottom-4.left-4.right-4.z-10 img {
+  height: 52px;
+}
+
+/* Layers panel stays readable but takes less horizontal real estate. */
+.mission-lab-explorer .absolute.left-4.w-\[180px\],
+.mission-lab-explorer .absolute.left-4.w-\[200px\] {
+  width: 172px;
+}
+
+@media (max-width: 1100px) {
+  .mission-lab-explorer > .mb-4.grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mission-lab-explorer > .grid.overflow-hidden {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+}
+
+@media (max-width: 800px) {
+  .mission-lab-main {
+    padding: 0;
+  }
+
+  .mission-lab-explorer > .mb-4.grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-inline: 10px;
+  }
+
+  .mission-lab-explorer > .grid.overflow-hidden {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-lab-explorer > .grid.overflow-hidden > .relative {
+    height: 68vh !important;
+    min-height: 520px !important;
+  }
+
+  .mission-lab-explorer > .grid.overflow-hidden > aside {
+    min-height: auto !important;
+    max-height: none;
+  }
+
+  .mission-lab-explorer .absolute.bottom-4.left-4.right-4.z-10 .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mission-lab-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.mission-lab-simulator {
+  min-height: calc(100vh - 125px);
+}
+
+@media (max-width: 640px) {
+  .mission-lab-toolbar {
+    padding-inline: 10px;
+  }
+}
+
+
+/* Mission Lab expansion — immersive multi-module operations console */
+.mission-lab-nav {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.mission-overview-hero {
+  background:
+    radial-gradient(ellipse at 78% 30%, color-mix(in srgb, var(--amber) 13%, transparent), transparent 31%),
+    radial-gradient(ellipse at 12% 92%, color-mix(in srgb, var(--cyan) 10%, transparent), transparent 34%),
+    linear-gradient(135deg, var(--panel), color-mix(in srgb, var(--ink2) 78%, var(--panel)));
+  box-shadow: 0 24px 80px rgba(15, 23, 42, .06);
+}
+.mission-overview-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .55;
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--line) 38%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--line) 38%, transparent) 1px, transparent 1px);
+  background-size: 34px 34px;
+  mask-image: linear-gradient(100deg, black, transparent 86%);
+}
+.mission-hero-orbit {
+  position: absolute;
+  pointer-events: none;
+  border: 1px solid color-mix(in srgb, var(--amber) 19%, transparent);
+  border-radius: 9999px;
+}
+.mission-hero-orbit-one { width: 580px; height: 580px; right: -260px; top: -310px; }
+.mission-hero-orbit-two { width: 460px; height: 460px; right: -200px; top: -250px; border-style: dashed; border-color: color-mix(in srgb, var(--cyan) 22%, transparent); }
+.mission-hero-planet { isolation: isolate; }
+.mission-hero-planet-glow {
+  position: absolute;
+  inset: 7%;
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--amber) 25%, transparent), transparent 68%);
+  filter: blur(18px);
+}
+.mission-hero-planet-image {
+  position: absolute;
+  inset: 11%;
+  border-radius: 50%;
+  background-color: #9b4329;
+  background-image:
+    radial-gradient(ellipse at 35% 25%, rgba(245, 177, 116, .65), transparent 21%),
+    radial-gradient(ellipse at 66% 66%, rgba(54, 25, 22, .75), transparent 29%),
+    radial-gradient(ellipse at 28% 72%, rgba(211, 111, 65, .65), transparent 24%),
+    url("/models/textures/mars_baseColor.png"),
+    radial-gradient(circle at 35% 30%, #e18b54, #a9472d 55%, #3d1c1b 100%);
+  background-size: cover, cover, cover, cover, cover;
+  background-position: center;
+  box-shadow: inset -28px -18px 50px rgba(10, 10, 15, .75), inset 12px 8px 26px rgba(255, 188, 124, .25), 0 25px 70px rgba(115, 53, 32, .28);
+  transform: rotate(-12deg);
+}
+.mission-hero-planet-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(115deg, transparent 30%, rgba(9, 13, 20, .72) 100%);
+}
+.mission-hero-orbit-line {
+  position: absolute;
+  inset: 4%;
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  border-radius: 50%;
+  transform: rotate(-26deg) scaleY(.35);
+}
+.mission-hero-orbit-line::after {
+  content: "";
+  position: absolute;
+  left: 16%;
+  top: 12%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--cyan) 75%, transparent);
+}
+.mission-module-card { min-width: 0; }
+.mission-terrain-page .mission-lab-explorer { width: 100%; max-width: none; }
+.mission-terrain-page .mission-lab-explorer > .grid.overflow-hidden > .relative {
+  height: min(76vh, 980px) !important;
+  min-height: 600px !important;
+}
+.mission-terrain-page .mission-lab-explorer > .grid.overflow-hidden > aside {
+  min-height: min(76vh, 980px) !important;
+  max-height: min(76vh, 980px);
+}
+.mission-input {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--bright);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.mission-input:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 16%, transparent);
+}
+.mission-input option { background: var(--panel); color: var(--bright); }
+.mission-brief { overflow-wrap: anywhere; }
+html.dark .mission-overview-hero {
+  background:
+    radial-gradient(ellipse at 78% 30%, rgba(245, 158, 11, .13), transparent 31%),
+    radial-gradient(ellipse at 12% 92%, rgba(8, 145, 178, .11), transparent 34%),
+    linear-gradient(135deg, #111b29, #0c131d);
+  box-shadow: 0 24px 80px rgba(0,0,0,.25);
+}
+html.dark .mission-hero-planet-image {
+  box-shadow: inset -32px -22px 58px rgba(0,0,0,.8), inset 12px 8px 26px rgba(255,188,124,.18), 0 25px 70px rgba(0,0,0,.45);
+}
+@media (max-width: 800px) {
+  .mission-terrain-page .mission-lab-explorer > .grid.overflow-hidden > .relative {
+    height: 70vh !important;
+    min-height: 520px !important;
+  }
+  .mission-terrain-page .mission-lab-explorer > .grid.overflow-hidden > aside {
+    min-height: auto !important;
+    max-height: none;
+  }
+  .mission-hero-planet { max-width: 300px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mission-module-card { transition: none; }
+}

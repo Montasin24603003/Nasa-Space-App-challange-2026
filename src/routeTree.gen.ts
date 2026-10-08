@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HazardLayersRouteImport } from './routes/hazard-layers'
+import { Route as MissionLabRouteImport } from './routes/mission-lab'
 import { Route as ProtocolsRouteImport } from './routes/protocols'
 import { Route as ResourcesRouteImport } from './routes/resources'
 import { Route as SolBySolRouteImport } from './routes/sol-by-sol'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const HazardLayersRoute = HazardLayersRouteImport.update({
   id: '/hazard-layers',
   path: '/hazard-layers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionLabRoute = MissionLabRouteImport.update({
+  id: '/mission-lab',
+  path: '/mission-lab',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProtocolsRoute = ProtocolsRouteImport.update({
@@ -50,6 +56,7 @@ const ApiMarsAdvisorRoute = ApiMarsAdvisorRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/hazard-layers': typeof HazardLayersRoute
+  '/mission-lab': typeof MissionLabRoute
   '/protocols': typeof ProtocolsRoute
   '/resources': typeof ResourcesRoute
   '/sol-by-sol': typeof SolBySolRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/hazard-layers': typeof HazardLayersRoute
+  '/mission-lab': typeof MissionLabRoute
   '/protocols': typeof ProtocolsRoute
   '/resources': typeof ResourcesRoute
   '/sol-by-sol': typeof SolBySolRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/hazard-layers': typeof HazardLayersRoute
+  '/mission-lab': typeof MissionLabRoute
   '/protocols': typeof ProtocolsRoute
   '/resources': typeof ResourcesRoute
   '/sol-by-sol': typeof SolBySolRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/hazard-layers'
+    | '/mission-lab'
     | '/protocols'
     | '/resources'
     | '/sol-by-sol'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/hazard-layers'
+    | '/mission-lab'
     | '/protocols'
     | '/resources'
     | '/sol-by-sol'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/hazard-layers'
+    | '/mission-lab'
     | '/protocols'
     | '/resources'
     | '/sol-by-sol'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HazardLayersRoute: typeof HazardLayersRoute
+  MissionLabRoute: typeof MissionLabRoute
   ProtocolsRoute: typeof ProtocolsRoute
   ResourcesRoute: typeof ResourcesRoute
   SolBySolRoute: typeof SolBySolRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/hazard-layers'
       fullPath: '/hazard-layers'
       preLoaderRoute: typeof HazardLayersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission-lab': {
+      id: '/mission-lab'
+      path: '/mission-lab'
+      fullPath: '/mission-lab'
+      preLoaderRoute: typeof MissionLabRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/protocols': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HazardLayersRoute: HazardLayersRoute,
+  MissionLabRoute: MissionLabRoute,
   ProtocolsRoute: ProtocolsRoute,
   ResourcesRoute: ResourcesRoute,
   SolBySolRoute: SolBySolRoute,

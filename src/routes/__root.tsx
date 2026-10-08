@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -164,6 +165,9 @@ function ThemeToggle() {
 }
 
 function SiteLayout({ children }: { children: ReactNode }) {
+  const location = useLocation();
+  const isMissionLab = location.pathname === "/mission-lab";
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-ink text-bright">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_70%_-10%,rgba(247,185,86,.10)_0%,transparent_48%)]" />
@@ -191,30 +195,34 @@ function SiteLayout({ children }: { children: ReactNode }) {
               </p>
             </div>
           </Link>
-          <nav className="hidden items-center gap-7 text-[13px] text-fog md:flex">
+          <nav className="hidden items-center gap-1 rounded-2xl border border-line/80 bg-panel/70 p-1.5 shadow-sm backdrop-blur-xl md:flex">
             <Link
               to="/"
-              activeProps={{ className: "text-bright" }}
+              className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright"
+              activeProps={{ className: "rounded-xl bg-amber/10 px-3 py-2 font-medium text-bright" }}
               activeOptions={{ exact: true }}
             >
               Mission Map
             </Link>
-            <Link to="/hazard-layers" activeProps={{ className: "text-bright" }}>
+            <Link to="/hazard-layers" className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright" activeProps={{ className: "rounded-xl bg-rose/10 px-3 py-2 font-medium text-bright" }}>
               Hazard Layers
             </Link>
-            <Link to="/resources" activeProps={{ className: "text-bright" }}>
+            <Link to="/resources" className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright" activeProps={{ className: "rounded-xl bg-cyan/10 px-3 py-2 font-medium text-bright" }}>
               Resources
             </Link>
-            <a href="/#data-atlas" className="transition-colors hover:text-bright">
+            <Link to="/mission-lab" className="rounded-xl px-3 py-2 transition-colors hover:bg-amber/10 hover:text-bright" activeProps={{ className: "rounded-xl bg-amber/10 px-3 py-2 font-medium text-bright" }}>
+              Mission Lab
+            </Link>
+            <a href="/#data-atlas" className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright">
               NASA Data
             </a>
-            <a href="/#simulator" className="transition-colors hover:text-bright">
+            <a href="/#simulator" className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright">
               Simulator
             </a>
-            <Link to="/protocols" activeProps={{ className: "text-bright" }}>
+            <Link to="/protocols" className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright" activeProps={{ className: "rounded-xl bg-amber/10 px-3 py-2 font-medium text-bright" }}>
               Survival Protocols
             </Link>
-            <Link to="/sol-by-sol" activeProps={{ className: "text-bright" }}>
+            <Link to="/sol-by-sol" className="rounded-xl px-3 py-2 transition-colors hover:bg-ink2 hover:text-bright" activeProps={{ className: "rounded-xl bg-mint/10 px-3 py-2 font-medium text-bright" }}>
               Sol by Sol
             </Link>
           </nav>
@@ -233,8 +241,20 @@ function SiteLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </header>
+      <div className="relative z-10 border-b border-line/70 bg-panel/70 px-5 py-2 backdrop-blur-xl md:hidden">
+        <div className="mx-auto flex max-w-7xl gap-1 overflow-x-auto pb-0.5 text-[11px] font-medium whitespace-nowrap">
+          <Link to="/" activeProps={{ className: "bg-amber/10 text-bright" }} activeOptions={{ exact: true }} className="rounded-lg px-3 py-1.5 text-fog">Map</Link>
+          <Link to="/hazard-layers" activeProps={{ className: "bg-rose/10 text-bright" }} className="rounded-lg px-3 py-1.5 text-fog">Hazards</Link>
+          <Link to="/resources" activeProps={{ className: "bg-cyan/10 text-bright" }} className="rounded-lg px-3 py-1.5 text-fog">Resources</Link>
+          <Link to="/mission-lab" activeProps={{ className: "bg-amber/10 text-bright" }} className="rounded-lg px-3 py-1.5 text-fog">Mission Lab</Link>
+          <a href="/#data-atlas" className="rounded-lg px-3 py-1.5 text-fog">NASA Data</a>
+          <a href="/#simulator" className="rounded-lg px-3 py-1.5 text-fog">Simulator</a>
+          <Link to="/protocols" className="rounded-lg px-3 py-1.5 text-fog">Protocols</Link>
+          <Link to="/sol-by-sol" className="rounded-lg px-3 py-1.5 text-fog">Sol by Sol</Link>
+        </div>
+      </div>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-5 py-8">{children}</main>
+      <main className={`relative z-10 ${isMissionLab ? "mission-lab-main" : "mx-auto max-w-7xl px-5 py-8"}`}>{children}</main>
 
       <footer className="relative z-10 border-t border-line bg-white/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-5 py-4 sm:flex-row">

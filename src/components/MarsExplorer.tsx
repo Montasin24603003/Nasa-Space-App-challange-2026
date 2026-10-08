@@ -57,6 +57,19 @@ export type MarsSite = {
 
 const LOCAL_MARS_MODEL = "/models/scene.gltf";
 
+type ModelView = "globe" | "regional";
+
+const REGIONAL_MODELS = [
+  { id: "tharsis", name: "Tharsis", file: "/models/regions/01_Tharsis.glb", preview: "/models/regions/previews/01_Tharsis_3D_Model.png" },
+  { id: "valles", name: "Valles Marineris", file: "/models/regions/02_Valles_Marineris.glb", preview: "/models/regions/previews/02_Valles_Marineris_3D_Model.png" },
+  { id: "hellas", name: "Hellas / Isidis", file: "/models/regions/03_Hellas_Isidis.glb", preview: "/models/regions/previews/03_Hellas_Isidis_3D_Model.png" },
+  { id: "elysium", name: "Elysium / Utopia", file: "/models/regions/04_Elysium_Utopia.glb", preview: "/models/regions/previews/04_Elysium_Utopia_3D_Model.png" },
+  { id: "arabia", name: "Arabia / Meridiani", file: "/models/regions/05_Arabia_Meridiani.glb", preview: "/models/regions/previews/05_Arabia_Meridiani_3D_Model.png" },
+  { id: "north-pole", name: "North Pole", file: "/models/regions/06_North_Pole.glb", preview: "/models/regions/previews/06_North_Pole_3D_Model.png" },
+  { id: "south-pole", name: "South Pole", file: "/models/regions/07_South_Pole.glb", preview: "/models/regions/previews/07_South_Pole_3D_Model.png" },
+] as const;
+
+
 const defaultMarsSite: MarsSite = {
   id: "jezero",
   name: "Jezero Crater",
@@ -213,6 +226,38 @@ function MarsModel() {
   return <primitive object={model} scale={0.026} />;
 }
 
+function RegionalMarsModel({ modelId }: { modelId: (typeof REGIONAL_MODELS)[number]["id"] }) {
+  const config = REGIONAL_MODELS.find((item) => item.id === modelId) ?? REGIONAL_MODELS[0];
+  const { scene } = useGLTF(config.file);
+  const model = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    const box = new THREE.Box3().setFromObject(model);
+    const center = box.getCenter(new THREE.Vector3());
+    const size = box.getSize(new THREE.Vector3());
+    const maxDimension = Math.max(size.x, size.y, size.z) || 1;
+    const scale = 2.15 / maxDimension;
+
+    model.scale.setScalar(scale);
+    model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+    model.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach((material) => {
+        if (material instanceof THREE.MeshStandardMaterial) {
+          material.roughness = Math.max(material.roughness, 0.78);
+          material.metalness = 0.02;
+        }
+      });
+    });
+  }, [model]);
+
+  return <primitive object={model} rotation={[-0.28, 0.08, 0]} />;
+}
+
 class ModelBoundary extends Component<{ fallback: ReactNode; children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
 
@@ -362,11 +407,15 @@ function MarsBody({
   selectedId,
   onSelect,
   enabledLayers,
+  modelView,
+  regionalModelId,
 }: {
   active: boolean;
   selectedId: string;
   onSelect: (id: string) => void;
   enabledLayers: Record<LayerKey, boolean>;
+  modelView: ModelView;
+  regionalModelId: (typeof REGIONAL_MODELS)[number]["id"];
 }) {
   const group = useRef<THREE.Group>(null);
   useFrame((_, rawDelta) => {
@@ -377,17 +426,21 @@ function MarsBody({
     <group ref={group}>
       <ModelBoundary fallback={<ProceduralMars />}>
         <Suspense fallback={<ModelLoader />}>
-          <MarsModel />
+          {modelView === "regional" ? <RegionalMarsModel modelId={regionalModelId} /> : <MarsModel />}
         </Suspense>
       </ModelBoundary>
-      {enabledLayers.terrain && (
-        <mesh scale={1.015}>
-          <sphereGeometry args={[1.05, 24, 24]} />
-          <meshBasicMaterial color="#f5c9a8" wireframe transparent opacity={0.035} />
-        </mesh>
+      {modelView === "globe" && (
+        <>
+          {enabledLayers.terrain && (
+            <mesh scale={1.015}>
+              <sphereGeometry args={[1.05, 24, 24]} />
+              <meshBasicMaterial color="#f5c9a8" wireframe transparent opacity={0.035} />
+            </mesh>
+          )}
+          <LocationMarkers selectedId={selectedId} onSelect={onSelect} enabledLayers={enabledLayers} />
+          <RouteArc selectedId={selectedId} visible={enabledLayers.route} />
+        </>
       )}
-      <LocationMarkers selectedId={selectedId} onSelect={onSelect} enabledLayers={enabledLayers} />
-      <RouteArc selectedId={selectedId} visible={enabledLayers.route} />
     </group>
   );
 }
@@ -398,12 +451,16 @@ function MarsScene({
   spinning,
   viewKey,
   enabledLayers,
+  modelView,
+  regionalModelId,
 }: {
   selectedId: string;
   onSelect: (id: string) => void;
   spinning: boolean;
   viewKey: number;
   enabledLayers: Record<LayerKey, boolean>;
+  modelView: ModelView;
+  regionalModelId: (typeof REGIONAL_MODELS)[number]["id"];
 }) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
 
@@ -414,7 +471,7 @@ function MarsScene({
 
   return (
     <>
-      <color attach="background" args={["#eaf0f5"]} />
+      <color attach="background" args={[modelView === "regional" ? "#101b27" : "#eaf0f5"]} />
       <Stars />
       <ambientLight intensity={0.55} color="#9ab8c7" />
       <directionalLight position={[-4, 2.5, 5]} intensity={3.2} color="#ffd1a1" />
@@ -423,7 +480,14 @@ function MarsScene({
         <Lightformer intensity={1.8} position={[0, 4, 4]} scale={[8, 8, 1]} />
         <Lightformer intensity={0.7} color="#8bc8d4" position={[-5, 0, -2]} rotation-y={Math.PI / 2} scale={[8, 2, 1]} />
       </Environment>
-      <MarsBody active={spinning} selectedId={selectedId} onSelect={onSelect} enabledLayers={enabledLayers} />
+      <MarsBody
+        active={spinning}
+        selectedId={selectedId}
+        onSelect={onSelect}
+        enabledLayers={enabledLayers}
+        modelView={modelView}
+        regionalModelId={regionalModelId}
+      />
       <OrbitControls
         ref={controls}
         makeDefault
@@ -439,11 +503,13 @@ function MarsScene({
   );
 }
 
-export function MarsExplorer() {
+export function MarsExplorer({ initialModelView = "globe", immersive = false }: { initialModelView?: ModelView; immersive?: boolean } = {}) {
   const [selectedId, setSelectedId] = useState(defaultMarsSite.id);
   const [spinning, setSpinning] = useState(true);
   const [viewKey, setViewKey] = useState(0);
   const [marswalk, setMarswalk] = useState(false);
+  const [modelView, setModelView] = useState<ModelView>(initialModelView);
+  const [regionalModelId, setRegionalModelId] = useState<(typeof REGIONAL_MODELS)[number]["id"]>("tharsis");
   const [enabledLayers, setEnabledLayers] = useState<Record<LayerKey, boolean>>({
     terrain: true,
     hazards: true,
@@ -459,7 +525,7 @@ export function MarsExplorer() {
   };
 
   return (
-    <section aria-labelledby="mars-explorer-heading" className="rise-in">
+    <section aria-labelledby="mars-explorer-heading" className={immersive ? "mission-lab-explorer rise-in" : "rise-in"}>
       <div className="mb-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
           <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.24em] text-cyan">
@@ -484,6 +550,22 @@ export function MarsExplorer() {
           <Button variant="outline" size="icon" onClick={() => setViewKey((value) => value + 1)} aria-label="Reset globe view" title="Reset view">
             <RotateCcw />
           </Button>
+          <div className="inline-flex overflow-hidden rounded-lg border border-line bg-panel/80 p-0.5">
+            <button
+              type="button"
+              onClick={() => setModelView("globe")}
+              className={`px-2.5 py-2 font-mono text-[9px] uppercase tracking-[0.12em] transition ${modelView === "globe" ? "bg-cyan/15 text-cyan" : "text-fog hover:text-bright"}`}
+            >
+              Globe
+            </button>
+            <button
+              type="button"
+              onClick={() => setModelView("regional")}
+              className={`px-2.5 py-2 font-mono text-[9px] uppercase tracking-[0.12em] transition ${modelView === "regional" ? "bg-amber/15 text-amber" : "text-fog hover:text-bright"}`}
+            >
+              3D Terrain
+            </button>
+          </div>
           <Button size="sm" onClick={() => setMarswalk(true)} className="bg-amber text-ink hover:bg-amber/90">
             <Crosshair />
             Enter Marswalk
@@ -503,25 +585,57 @@ export function MarsExplorer() {
       </div>
 
       <div className="grid overflow-hidden rounded-2xl border border-line/70 bg-panel/30 shadow-2xl shadow-black/20 lg:grid-cols-[minmax(0,1.5fr)_minmax(330px,0.7fr)]">
-        <div className="relative h-[610px] min-h-[520px] overflow-hidden bg-ink2">
-          <Canvas camera={{ position: [0, 0.2, 3.45], fov: 43 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: false }}>
-            <MarsScene selectedId={selectedId} onSelect={setSelectedId} spinning={spinning} viewKey={viewKey} enabledLayers={enabledLayers} />
+        <div className={`relative overflow-hidden bg-ink2 ${modelView === "regional" ? "h-[720px] min-h-[620px]" : "h-[610px] min-h-[520px]"}`}>
+          <Canvas camera={{ position: modelView === "regional" ? [0, 1.15, 3.05] : [0, 0.2, 3.45], fov: modelView === "regional" ? 48 : 43 }} dpr={[1, 1.6]} gl={{ antialias: true, alpha: false }}>
+            <MarsScene
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              spinning={spinning}
+              viewKey={viewKey}
+              enabledLayers={enabledLayers}
+              modelView={modelView}
+              regionalModelId={regionalModelId}
+            />
           </Canvas>
 
           <div className="pointer-events-none absolute left-4 top-4 right-4 flex items-start justify-between gap-3">
-            <div className="rounded-xl border border-line/70 bg-white/90 p-3 backdrop-blur-xl">
-              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-fog">Surface survey</p>
-              <p className="mt-1 font-display text-sm font-semibold text-bright">{selected.region}</p>
+            <div className="rounded-xl border border-line/70 bg-[#0a1420]/82 p-3 text-white shadow-lg backdrop-blur-xl">
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-fog">{modelView === "regional" ? "Regional terrain" : "Surface survey"}</p>
+              <p className="mt-1 font-display text-sm font-semibold text-bright">{modelView === "regional" ? (REGIONAL_MODELS.find((m) => m.id === regionalModelId)?.name ?? "Terrain model") : selected.region}</p>
               <p className="mt-0.5 font-mono text-[10px] text-cyan">{selected.coordinates} · elev {selected.elevation}</p>
             </div>
-            <div className="rounded-xl border border-amber/25 bg-white/90 px-3 py-2 text-right backdrop-blur-xl">
+            <div className="rounded-xl border border-amber/25 bg-[#0a1420]/82 px-3 py-2 text-right text-white shadow-lg backdrop-blur-xl">
               <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-amber">Data mode</p>
               <p className="mt-1 font-mono text-[10px] text-bright">SIMULATION / NASA READY</p>
             </div>
           </div>
 
-          <div className="absolute left-4 top-24 w-[180px] space-y-2 sm:w-[200px]">
-            <div className="rounded-xl border border-line/70 bg-white/90 p-3 backdrop-blur-xl">
+          {modelView === "regional" && (
+            <div className="absolute bottom-4 left-4 right-4 z-10 rounded-2xl border border-white/15 bg-[#0a1420]/88 p-3 shadow-2xl backdrop-blur-xl">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div>
+                  <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-cyan">Regional terrain library</p>
+                  <p className="mt-0.5 font-display text-sm font-semibold text-white">Choose a dataset to inspect</p>
+                </div>
+                <span className="rounded-full border border-amber/30 bg-amber/10 px-2.5 py-1 font-mono text-[9px] uppercase tracking-[.1em] text-amber">7 NASA-ready models</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 xl:grid-cols-7">
+                {REGIONAL_MODELS.map((model) => {
+                  const active = model.id === regionalModelId;
+                  return (
+                    <button key={model.id} type="button" onClick={() => setRegionalModelId(model.id)}
+                      className={`group overflow-hidden rounded-xl border text-left transition-all ${active ? "border-amber/80 bg-amber/10 ring-1 ring-amber/30" : "border-white/10 bg-white/[.04] hover:border-cyan/50 hover:bg-white/[.08]"}`}>
+                      <img src={model.preview} alt="" className="h-16 w-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                      <span className={`block truncate px-2 py-2 font-mono text-[8px] uppercase tracking-[0.06em] ${active ? "text-amber" : "text-white/80"}`}>{model.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className={`absolute left-4 ${modelView === "regional" ? "top-[350px]" : "top-24"} w-[180px] space-y-2 sm:w-[200px]`}>
+            <div className="rounded-xl border border-line/70 bg-[#0a1420]/82 p-3 text-white shadow-lg backdrop-blur-xl">
               <div className="mb-2 flex items-center justify-between">
                 <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-fog">Map layers</p>
                 <span className="font-mono text-[9px] text-cyan">5 channels</span>
@@ -561,15 +675,15 @@ export function MarsExplorer() {
               </div>
             </div>
             <div className="rounded-xl border border-amber/30 bg-amber/10 px-3 py-2 backdrop-blur-xl">
-              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-amber">Current mission leg</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-amber">{modelView === "regional" ? "3D terrain dataset" : "Current mission leg"}</p>
               <p className="mt-1 font-display text-sm font-semibold text-bright">
-                {selected.name} <span className="text-fog">→</span> {destination.name}
+                {modelView === "regional" ? (REGIONAL_MODELS.find((m) => m.id === regionalModelId)?.name ?? "Regional terrain") : <>{selected.name} <span className="text-fog">→</span> {destination.name}</>}
               </p>
             </div>
           </div>
         </div>
 
-        <aside className="flex min-h-[610px] flex-col border-t border-line/70 bg-ink/35 p-5 lg:border-l lg:border-t-0" aria-live="polite">
+        <aside className={`flex flex-col border-t border-line/70 bg-ink/35 p-5 lg:border-l lg:border-t-0 ${modelView === "regional" ? "min-h-[720px]" : "min-h-[610px]"}`} aria-live="polite">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-amber">Selected waypoint</p>

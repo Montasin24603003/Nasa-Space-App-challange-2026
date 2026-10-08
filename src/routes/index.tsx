@@ -1,9 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, ArrowUpRight, CircleDot, Compass, FlaskConical, MapPinned, Play, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, CircleDot, Compass, FlaskConical, MapPinned, Play, ShieldCheck, Sparkles, Box } from "lucide-react";
 
 import { MarsExplorer, marsSites } from "@/components/MarsExplorer";
 import { NasaDataAtlas } from "@/components/NasaDataAtlas";
 import { SurvivalSimulator } from "@/components/SurvivalSimulator";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment, Html, Lightformer, useGLTF } from "@react-three/drei";
+import * as THREE from "three";
+import { Suspense, useEffect, useMemo } from "react";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -27,6 +31,50 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
+
+function HomeMarsGlobe() {
+  const { scene } = useGLTF("/models/scene.gltf");
+  const model = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    model.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+      const materials = Array.isArray(object.material) ? object.material : [object.material];
+      materials.forEach((material) => {
+        if (material instanceof THREE.MeshStandardMaterial) {
+          material.roughness = Math.max(material.roughness, 0.72);
+          material.metalness = Math.min(material.metalness, 0.04);
+        }
+      });
+    });
+  }, [model]);
+
+  return (
+    <>
+      <color attach="background" args={["#08111b"]} />
+      <ambientLight intensity={0.65} color="#b9d8e4" />
+      <directionalLight position={[4, 3, 5]} intensity={3.2} color="#ffd0b1" />
+      <directionalLight position={[-4, 0, -3]} intensity={0.85} color="#55d5e8" />
+      <Environment>
+        <Lightformer intensity={1.2} color="#ffb58f" position={[4, 2, 4]} scale={[5, 5, 1]} />
+        <Lightformer intensity={0.5} color="#63c8dc" position={[-4, 0, -2]} rotation-y={Math.PI / 2} scale={[4, 3, 1]} />
+      </Environment>
+      <group rotation={[0.05, -0.42, 0]}>
+        <primitive object={model} scale={0.026} />
+        <mesh scale={1.012}>
+          <sphereGeometry args={[1.05, 48, 48]} />
+          <meshBasicMaterial color="#f2b49b" wireframe transparent opacity={0.035} />
+        </mesh>
+      </group>
+      <mesh scale={1.18}>
+        <sphereGeometry args={[1, 48, 48]} />
+        <meshBasicMaterial color="#d7f5ff" transparent opacity={0.045} side={THREE.BackSide} />
+      </mesh>
+    </>
+  );
+}
 
 function Index() {
   return (
@@ -67,20 +115,27 @@ function Index() {
           <div className="relative mx-auto w-full max-w-[500px]">
             <div className="soft-card relative overflow-hidden rounded-[24px] p-3">
               <div className="relative aspect-[1.08/1] overflow-hidden rounded-[18px] bg-[#111827]">
-                <img src="/mars-jezero-map.jpg" alt="Martian surface reference map" className="absolute inset-0 size-full object-cover opacity-80" />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_52%_48%,transparent_0_18%,rgba(10,16,24,.15)_45%,rgba(10,16,24,.76)_100%)]" />
-                <div className="absolute left-4 top-4 rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-white backdrop-blur-md">
-                  <p className="font-mono text-[8px] uppercase tracking-[.2em] text-white/60">Current sector</p>
+                <div className="absolute inset-0">
+                  <Canvas camera={{ position: [0, 0.15, 3.65], fov: 40 }} dpr={[1, 1.6]}>
+                    <Suspense fallback={<Html center><div className="rounded-full border border-white/20 bg-black/60 px-4 py-2 font-mono text-[10px] uppercase tracking-[.16em] text-white">Loading Mars terrain…</div></Html>}>
+                      <HomeMarsGlobe />
+                    </Suspense>
+                    <OrbitControls enablePan={false} minDistance={2.55} maxDistance={4.8} autoRotate autoRotateSpeed={0.42} enableDamping dampingFactor={0.06} />
+                  </Canvas>
+                </div>
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_48%,transparent_0_30%,rgba(7,12,18,.08)_58%,rgba(7,12,18,.7)_100%)] pointer-events-none" />
+                <div className="absolute left-4 top-4 rounded-xl border border-white/15 bg-black/45 px-3 py-2 text-white backdrop-blur-md">
+                  <div className="flex items-center gap-2"><Box className="size-3 text-cyan" /><p className="font-mono text-[8px] uppercase tracking-[.2em] text-white/60">NASA Mars 3D</p></div>
                   <p className="mt-1 font-display text-sm font-semibold">Jezero Crater</p>
                   <p className="mt-0.5 font-mono text-[9px] text-cyan">18.4°N · 77.5°E</p>
+                </div>
+                <div className="absolute right-4 top-4 rounded-full border border-white/15 bg-black/35 px-2.5 py-1 font-mono text-[8px] uppercase tracking-[.14em] text-white/70 backdrop-blur-md">
+                  Drag · Zoom · Explore
                 </div>
                 <div className="absolute bottom-4 left-4 right-4 grid grid-cols-3 gap-2">
                   <HeroMetric label="Route" value="91%" />
                   <HeroMetric label="Water ice" value="HIGH" />
                   <HeroMetric label="Science" value="8" />
-                </div>
-                <div className="mars-float absolute right-[16%] top-[29%] grid size-28 place-items-center rounded-full border border-white/20 bg-white/10 shadow-2xl backdrop-blur-[2px] sm:size-32">
-                  <div className="size-20 rounded-full bg-[radial-gradient(circle_at_34%_30%,#f5c29d,#b75b3d_52%,#682f28_100%)] shadow-[inset_-12px_-12px_25px_rgba(40,10,5,.32),0_15px_45px_rgba(0,0,0,.45)] sm:size-24" />
                 </div>
               </div>
               <div className="flex items-center justify-between gap-4 px-2 pb-1 pt-3">
@@ -93,6 +148,27 @@ function Index() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="mt-5 grid gap-4 lg:grid-cols-[1.2fr_.8fr]">
+        <div className="rounded-2xl border border-line bg-white/80 p-5 shadow-sm backdrop-blur-xl sm:p-6">
+          <div className="flex items-center gap-3">
+            <div className="grid size-10 place-items-center rounded-xl bg-cyan/10 text-cyan"><Box className="size-5" /></div>
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[.2em] text-cyan">3D terrain lab</p>
+              <h2 className="font-display text-xl font-bold">Explore real regional terrain models</h2>
+            </div>
+          </div>
+          <p className="mt-3 max-w-3xl text-[13px] leading-relaxed text-fog">The globe above is interactive. Continue below to switch into the regional terrain lab and inspect seven supplied Mars GLB datasets from Tharsis to the polar caps.</p>
+          <div className="mt-4 flex flex-wrap gap-2 font-mono text-[9px] uppercase tracking-[.1em] text-fog">
+            <span className="rounded-full border border-line px-2.5 py-1">7 GLB regions</span><span className="rounded-full border border-line px-2.5 py-1">NASA mission planning</span><span className="rounded-full border border-line px-2.5 py-1">WebGL</span>
+          </div>
+        </div>
+        <a href="#mission-map" className="group rounded-2xl border border-amber/25 bg-amber/[.07] p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-amber/45 sm:p-6">
+          <div className="flex items-center justify-between"><span className="font-mono text-[10px] uppercase tracking-[.2em] text-amber">Mission Map</span><ArrowRight className="size-4 text-amber transition-transform group-hover:translate-x-1" /></div>
+          <p className="mt-3 font-display text-lg font-bold">Open 3D Terrain &amp; hazard layers</p>
+          <p className="mt-1 text-[12px] text-fog">Select a region, rotate the model, inspect resources, then plan the route.</p>
+        </a>
       </section>
 
       <div id="mission-map" className="scroll-mt-24 pt-8">
